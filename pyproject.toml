@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "BHub"
+version = "0.1.0"
+description = ""
+authors = ["André Felipe Dias <andref.dias@gmail.com>"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "*"
+pip-audit = "*"
+pytest = "*"
+pytest-cov = "*"
+ruff = "*"
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.mypy]
+ignore_missing_imports = true
+disallow_untyped_defs = true
+
+[tool.ruff]
+line-length = 100
+select = [
+    "ARG",
+    "B",
+    "C4",
+    "E",
+    "ERA",
+    "F",
+    "I",
+    "N",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    "RET",
+    "S",
+    "T10",
+    "T10",
+    "UP",
+    "W",
+]
+target-version = "py311"
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/**" = ["ARG", "PLR2004", "S"]
