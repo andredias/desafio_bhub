@@ -14,6 +14,7 @@ class Cotacao(BaseModel):
     preco_por_unidade_medida: Decimal | None = None
     quantidade: float = 0
     preco_total: Decimal | None = None
+    descontos: Decimal = Decimal('0')
 
 
 BusinessRule = Callable[[Cotacao], None]
@@ -70,8 +71,8 @@ def calc_leve_x_page_y(cotacao: Cotacao) -> None:
     leve = int(leve)
     pague = int(pague)
     assert leve > pague, 'Leve deve ser maior que pague'  # noqa: S101
-    qtd_final = cotacao.quantidade - (cotacao.quantidade // leve) * (leve - pague)
-    cotacao.preco_total = cotacao.preco * int(qtd_final)
+    quantidade = Decimal(str(cotacao.quantidade))
+    cotacao.descontos += cotacao.preco * (quantidade // leve) * (leve - pague)
 
 
 def calc_deconto_sobre_quantidade(cotacao: Cotacao) -> None:
@@ -87,16 +88,15 @@ def calc_deconto_sobre_quantidade(cotacao: Cotacao) -> None:
     acima_de, desconto = result[0]
     acima_de = int(acima_de)
     desconto = Decimal(desconto.replace(',', '.'))
-    cotacao.preco_total = cotacao.preco * int(cotacao.quantidade)
     if cotacao.quantidade >= acima_de:
-        cotacao.preco_total = cotacao.preco_total * (100 - desconto) / 100
+        cotacao.descontos += cotacao.preco * Decimal(str(cotacao.quantidade)) * desconto / 100
 
 
 manager = Manager(
     [
-        calc_preco_total,  # deve ser o primeiro da lista
         calc_preco_por_unidade,
         calc_leve_x_page_y,
         calc_deconto_sobre_quantidade,
+        calc_preco_total,
     ]
 )

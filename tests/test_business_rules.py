@@ -48,31 +48,31 @@ def test_calc_leve_x_page_y() -> None:
         nome_produto='fubá', regra_promocao='Leve 3, Pague 2', preco=Decimal('10.0'), quantidade=0
     )
     calc_leve_x_page_y(cotacao)
-    assert cotacao.preco_total == Decimal('0')
+    assert cotacao.descontos == Decimal('0')
 
     cotacao = Cotacao(
         nome_produto='fubá', regra_promocao='Leve 3, Pague 2', preco=Decimal('10.0'), quantidade=3
     )
     calc_leve_x_page_y(cotacao)
-    assert cotacao.preco_total == Decimal('20.0')
+    assert cotacao.descontos == Decimal('10.0')
 
     cotacao = Cotacao(
         nome_produto='fubá', regra_promocao='Leve 3 Pague 2', preco=Decimal('10.0'), quantidade=7
     )
     calc_leve_x_page_y(cotacao)
-    assert cotacao.preco_total == Decimal('50.0')
+    assert cotacao.descontos == Decimal('20.0')
 
     cotacao = Cotacao(
         nome_produto='fubá', regra_promocao='Leve 5 Pague 3', preco=Decimal('1.0'), quantidade=10
     )
     calc_leve_x_page_y(cotacao)
-    assert cotacao.preco_total == Decimal('6.0')
+    assert cotacao.descontos == Decimal('4.0')
 
     cotacao = Cotacao(
         nome_produto='fubá', regra_promocao='Leve 3, Pague 1', preco=Decimal('1.0'), quantidade=5
     )
     calc_leve_x_page_y(cotacao)
-    assert cotacao.preco_total == Decimal('3.0')
+    assert cotacao.descontos == Decimal('2.0')
 
 
 def test_calc_deconto_sobre_quantidade() -> None:
@@ -81,25 +81,25 @@ def test_calc_deconto_sobre_quantidade() -> None:
         nome_produto='fubá', regra_promocao=regra.format(3, 10), preco=Decimal('10.0'), quantidade=0
     )
     calc_deconto_sobre_quantidade(cotacao)
-    assert cotacao.preco_total == Decimal('0')
+    assert cotacao.descontos == Decimal('0')
 
     cotacao = Cotacao(
         nome_produto='fubá', regra_promocao=regra.format(3, 10), preco=Decimal('10.0'), quantidade=2
     )
     calc_deconto_sobre_quantidade(cotacao)
-    assert cotacao.preco_total == Decimal('20.0')
+    assert cotacao.descontos == Decimal('0')
 
     cotacao = Cotacao(
         nome_produto='fubá', regra_promocao=regra.format(3, 10), preco=Decimal('10.0'), quantidade=3
     )
     calc_deconto_sobre_quantidade(cotacao)
-    assert cotacao.preco_total == Decimal('27.0')
+    assert cotacao.descontos == Decimal('3.0')
 
     cotacao = Cotacao(
         nome_produto='fubá', regra_promocao=regra.format(3, 10), preco=Decimal('1.0'), quantidade=10
     )
     calc_deconto_sobre_quantidade(cotacao)
-    assert cotacao.preco_total == Decimal('9')
+    assert cotacao.descontos == Decimal('1')
 
     cotacao = Cotacao(
         nome_produto='fubá',
@@ -108,7 +108,7 @@ def test_calc_deconto_sobre_quantidade() -> None:
         quantidade=10,
     )
     calc_deconto_sobre_quantidade(cotacao)
-    assert cotacao.preco_total == Decimal('89.5')
+    assert cotacao.descontos == Decimal('10.5')
 
 
 def test_calc_preco_total() -> None:
@@ -164,21 +164,25 @@ def test_busines_rules_manager() -> None:
             'preco_por_unidade_medida': None,
             'unidade_medida': None,
             'preco_total': Decimal('4.5'),
+            'descontos': Decimal('0'),
         },
         {
             'preco_por_unidade_medida': Decimal('4.0'),
             'unidade_medida': 'kg',
-            'preco_total': Decimal('12.0'),
+            'preco_total': Decimal('18.0'),
+            'descontos': Decimal('6.0'),
         },
         {
             'preco_por_unidade_medida': Decimal('5.0'),
             'unidade_medida': 'kg',
             'preco_total': Decimal('50.0'),
+            'descontos': Decimal('0'),
         },
         {
             'preco_por_unidade_medida': Decimal('5.99'),
             'unidade_medida': 'kg',
-            'preco_total': Decimal('25.4575'),
+            'preco_total': Decimal('29.95'),
+            'descontos': Decimal('4.4925'),
         },
     ]
 
