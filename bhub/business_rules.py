@@ -9,18 +9,11 @@ from pydantic import BaseModel
 class Cotacao(BaseModel):
     nome_produto: str
     preco: Decimal
-    preco_promocional: Decimal | None = None
     regra_promocao: str | None = None
     unidade_medida: str | None = None
     preco_por_unidade: Decimal | None = None
     quantidade: float = 0
     preco_total: Decimal | None = None
-
-    @property
-    def preco_promocao_por_unidade(self) -> Decimal | None:
-        if self.preco_promocional and self.preco_por_unidade:
-            return self.preco_promocional * self.preco_por_unidade / self.preco
-        return None
 
 
 BusinessRule = Callable[[Cotacao], None]
@@ -59,8 +52,10 @@ def calc_leve_x_page_y(cotacao: Cotacao) -> None:
     """
     Leve X, pague Y
     """
+    if not cotacao.regra_promocao:
+        return
     padrao = r'leve\s(\d+)[,]?\spague\s(\d+)$'
-    result = re.findall(padrao, cotacao.nome_produto, flags=re.IGNORECASE)
+    result = re.findall(padrao, cotacao.regra_promocao, flags=re.IGNORECASE)
     if not result:
         return
     leve, pague = result[0]
@@ -71,4 +66,28 @@ def calc_leve_x_page_y(cotacao: Cotacao) -> None:
     cotacao.preco_total = cotacao.preco * int(qtd_final)
 
 
-manager = Manager(rules=[calc_preco_por_unidade, calc_leve_x_page_y])
+def calc_deconto_sobre_quantidade(cotacao: Cotacao) -> None:
+    """
+    Para X unidades ou mais, desconto de Y%
+    """
+    if not cotacao.regra_promocao:
+        return
+    padrao = r'para (\d+) unidades ou mais, desconto de ((?:\d+,)?\d+)%$'
+    result = re.findall(padrao, cotacao.regra_promocao, flags=re.IGNORECASE)
+    if not result:
+        return
+    acima_de, desconto = result[0]
+    acima_de = int(acima_de)
+    desconto = Decimal(desconto.replace(',', '.'))
+    cotacao.preco_total = cotacao.preco * int(cotacao.quantidade)
+    if cotacao.quantidade >= acima_de:
+        cotacao.preco_total = cotacao.preco_total * (100 - desconto) / 100
+
+
+manager = Manager(
+    [
+        calc_preco_por_unidade,
+        calc_leve_x_page_y,
+        calc_deconto_sobre_quantidade,
+    ]
+)

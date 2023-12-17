@@ -1,6 +1,11 @@
 from decimal import Decimal
 
-from bhub.business_rules import Cotacao, calc_leve_x_page_y, calc_preco_por_unidade
+from bhub.business_rules import (
+    Cotacao,
+    calc_deconto_sobre_quantidade,
+    calc_leve_x_page_y,
+    calc_preco_por_unidade,
+)
 
 
 def test_calc_preco_por_unidade() -> None:
@@ -37,22 +42,68 @@ def test_calc_preco_por_unidade() -> None:
 
 
 def test_calc_leve_x_page_y() -> None:
-    cotacao = Cotacao(nome_produto='Leve 3, Pague 2', preco=Decimal('10.0'), quantidade=0)
+    cotacao = Cotacao(
+        nome_produto='fubá', regra_promocao='Leve 3, Pague 2', preco=Decimal('10.0'), quantidade=0
+    )
     calc_leve_x_page_y(cotacao)
     assert cotacao.preco_total == Decimal('0')
 
-    cotacao = Cotacao(nome_produto='Leve 3, Pague 2', preco=Decimal('10.0'), quantidade=3)
+    cotacao = Cotacao(
+        nome_produto='fubá', regra_promocao='Leve 3, Pague 2', preco=Decimal('10.0'), quantidade=3
+    )
     calc_leve_x_page_y(cotacao)
     assert cotacao.preco_total == Decimal('20.0')
 
-    cotacao = Cotacao(nome_produto='Leve 3 Pague 2', preco=Decimal('10.0'), quantidade=7)
+    cotacao = Cotacao(
+        nome_produto='fubá', regra_promocao='Leve 3 Pague 2', preco=Decimal('10.0'), quantidade=7
+    )
     calc_leve_x_page_y(cotacao)
     assert cotacao.preco_total == Decimal('50.0')
 
-    cotacao = Cotacao(nome_produto='Leve 5 Pague 3', preco=Decimal('1.0'), quantidade=10)
+    cotacao = Cotacao(
+        nome_produto='fubá', regra_promocao='Leve 5 Pague 3', preco=Decimal('1.0'), quantidade=10
+    )
     calc_leve_x_page_y(cotacao)
     assert cotacao.preco_total == Decimal('6.0')
 
-    cotacao = Cotacao(nome_produto='Leve 3, Pague 1', preco=Decimal('1.0'), quantidade=5)
+    cotacao = Cotacao(
+        nome_produto='fubá', regra_promocao='Leve 3, Pague 1', preco=Decimal('1.0'), quantidade=5
+    )
     calc_leve_x_page_y(cotacao)
     assert cotacao.preco_total == Decimal('3.0')
+
+
+def test_calc_deconto_sobre_quantidade() -> None:
+    regra = 'para {} unidades ou mais, desconto de {}%'
+    cotacao = Cotacao(
+        nome_produto='fubá', regra_promocao=regra.format(3, 10), preco=Decimal('10.0'), quantidade=0
+    )
+    calc_deconto_sobre_quantidade(cotacao)
+    assert cotacao.preco_total == Decimal('0')
+
+    cotacao = Cotacao(
+        nome_produto='fubá', regra_promocao=regra.format(3, 10), preco=Decimal('10.0'), quantidade=2
+    )
+    calc_deconto_sobre_quantidade(cotacao)
+    assert cotacao.preco_total == Decimal('20.0')
+
+    cotacao = Cotacao(
+        nome_produto='fubá', regra_promocao=regra.format(3, 10), preco=Decimal('10.0'), quantidade=3
+    )
+    calc_deconto_sobre_quantidade(cotacao)
+    assert cotacao.preco_total == Decimal('27.0')
+
+    cotacao = Cotacao(
+        nome_produto='fubá', regra_promocao=regra.format(3, 10), preco=Decimal('1.0'), quantidade=10
+    )
+    calc_deconto_sobre_quantidade(cotacao)
+    assert cotacao.preco_total == Decimal('9')
+
+    cotacao = Cotacao(
+        nome_produto='fubá',
+        regra_promocao=regra.format(3, '10,5'),
+        preco=Decimal('10'),
+        quantidade=10,
+    )
+    calc_deconto_sobre_quantidade(cotacao)
+    assert cotacao.preco_total == Decimal('89.5')
