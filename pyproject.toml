@@ -10,6 +10,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+pydantic = "*"
+loguru = "*"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
