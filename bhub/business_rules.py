@@ -13,6 +13,8 @@ class Cotacao(BaseModel):
     regra_promocao: str | None = None
     unidade_medida: str | None = None
     preco_por_unidade: Decimal | None = None
+    quantidade: float = 0
+    preco_total: Decimal | None = None
 
     @property
     def preco_promocao_por_unidade(self) -> Decimal | None:
@@ -50,3 +52,21 @@ def calc_preco_por_unidade(cotacao: Cotacao) -> None:
         unidade = unidade.replace('ml', 'l').replace('g', 'kg')
     cotacao.unidade_medida = unidade
     cotacao.preco_por_unidade = cotacao.preco / Decimal(qtd) * fator
+
+
+def calc_leve_x_page_y(cotacao: Cotacao) -> None:
+    """
+    A cada x unidades, pague y unidades
+    """
+    padrao = r'leve\s(\d+)\spague\s(\d+)$'
+    if not (result := re.findall(padrao, cotacao.nome_produto, flags=re.IGNORECASE)):
+        return
+    leve, pague = result[0]
+    leve = int(leve)
+    pague = int(pague)
+    assert leve > pague, 'Leve deve ser maior que pague'  # noqa: S101
+    qtd_final = cotacao.quantidade - (cotacao.quantidade // leve) * (leve - pague)
+    cotacao.preco_total = cotacao.preco * int(qtd_final)
+
+
+manager = Manager(rules=[calc_preco_por_unidade, calc_leve_x_page_y])
