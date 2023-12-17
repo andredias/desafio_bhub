@@ -37,11 +37,11 @@ def test_calc_preco_por_unidade() -> None:
 
 
 def test_calc_leve_x_page_y() -> None:
-    cotacao = Cotacao(nome_produto='Leve 3 Pague 2', preco=Decimal('10.0'), quantidade=0)
+    cotacao = Cotacao(nome_produto='Leve 3, Pague 2', preco=Decimal('10.0'), quantidade=0)
     calc_leve_x_page_y(cotacao)
     assert cotacao.preco_total == Decimal('0')
 
-    cotacao = Cotacao(nome_produto='Leve 3 Pague 2', preco=Decimal('10.0'), quantidade=3)
+    cotacao = Cotacao(nome_produto='Leve 3, Pague 2', preco=Decimal('10.0'), quantidade=3)
     calc_leve_x_page_y(cotacao)
     assert cotacao.preco_total == Decimal('20.0')
 
@@ -53,6 +53,6 @@ def test_calc_leve_x_page_y() -> None:
     calc_leve_x_page_y(cotacao)
     assert cotacao.preco_total == Decimal('6.0')
 
-    cotacao = Cotacao(nome_produto='Leve 3 Pague 1', preco=Decimal('1.0'), quantidade=5)
+    cotacao = Cotacao(nome_produto='Leve 3, Pague 1', preco=Decimal('1.0'), quantidade=5)
     calc_leve_x_page_y(cotacao)
     assert cotacao.preco_total == Decimal('3.0')

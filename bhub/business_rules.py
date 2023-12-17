@@ -41,7 +41,8 @@ class Manager:
 
 def calc_preco_por_unidade(cotacao: Cotacao) -> None:
     padrao = r'\s((?:\d+,)?\d+)(ml|l|g|kg)$'
-    if not (result := re.findall(padrao, cotacao.nome_produto, flags=re.IGNORECASE)):
+    result = re.findall(padrao, cotacao.nome_produto, flags=re.IGNORECASE)
+    if not result:
         return
     qtd, unidade = result[0]
     qtd = qtd.replace(',', '.')
@@ -56,10 +57,11 @@ def calc_preco_por_unidade(cotacao: Cotacao) -> None:
 
 def calc_leve_x_page_y(cotacao: Cotacao) -> None:
     """
-    A cada x unidades, pague y unidades
+    Leve X, pague Y
     """
-    padrao = r'leve\s(\d+)\spague\s(\d+)$'
-    if not (result := re.findall(padrao, cotacao.nome_produto, flags=re.IGNORECASE)):
+    padrao = r'leve\s(\d+)[,]?\spague\s(\d+)$'
+    result = re.findall(padrao, cotacao.nome_produto, flags=re.IGNORECASE)
+    if not result:
         return
     leve, pague = result[0]
     leve = int(leve)
